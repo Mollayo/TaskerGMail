@@ -8,4 +8,4 @@ Limitations:
 - Not possible to send files in attachment.
 - Can only send mails.
 
-In order to use this plugin, you need to create a client ID. This should be done by enabling the GMail API and creating the credentials using your account with https://console.developers.google.com/.
+In order to use this plugin, you need to create a client ID. This should be done by enabling the GMail API and creating the credentials using your account with https://console.developers.google.com/. The method "initializeSettings()" in the file "AppAuthService.java" should then be modified with this new client ID.
