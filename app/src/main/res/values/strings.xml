@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name" formatted="false">TaskerGMail</string>
+    <string name="title_activity_edit">GMail</string>
+    <string name="setup" formatted="false">You\'re all setup and ready to rock!\n\nTasker GMail will now show up as a Plugin within Tasker when adding a new action</string>
+    <string name="message">Message</string>
+    <string name="type">Type</string>
+    <string name="wild">Wildcard</string>
+    <string name="exact_match">Exact Match</string>
+    <string name="blurb_var" formatted="false">The array %serial_data1, %serial_data2, etc  contains the data received from the Bluetooth device.\nThe variable %serial_addr contains the address of the Bluetooth device sending the data.</string>
+    <string name="plugin_name">Tasker GMail</string>
+    <string name="mac_hint">00:11:22:AA:BB:CC (Paired MAC Address)</string>
+    <string name="message_hint1">Email address of the recipient. It can be a variable.</string>
+    <string name="message_hint2">Subject of the email. It can be a variable.</string>
+    <string name="message_hint3">Body of the email. It can be a variable.</string>
+    <string name="crlf_message">Include CRLF (\\r\\n)</string>
+    <string name="crlf_message2">Send Event when receiving CRLF (\\r\\n)</string>
+    <string name="authentification_message">GMail authentication should be done in the app.</string>
+    <string name="button_message">Authorize GMail access</string>
+    <string name="invalid_email">Invalid EMail address</string>
+    <string name="invalid_subject">Empty subject</string>
+    <string name="bluetooth_error">This device does not support bluetooth</string>
+
+    <string name="authenticated">authenticated</string>
+    <string name="not_authenticated">not authenticated</string>
+    <string name="login_cancelled">Login cancelled</string>
+    <string name="login">Login</string>
+    <string name="test_send_mail">Send a test email</string>
+</resources>
