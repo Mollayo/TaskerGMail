@@ -7,3 +7,5 @@ Limitations:
 - Only one GMail account can be used at a time.
 - Not possible to send files in attachment.
 - Can only send mails.
+
+In order to use this plugin, you need to create a client ID. This should be done by enabling the GMail API and creating the credentials using your account with https://console.developers.google.com/.
