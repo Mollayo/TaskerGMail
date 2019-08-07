@@ -1,9 +1,9 @@
-# BluetoothSerialForTasker
-A plugin for Tasker (https://play.google.com/store/apps/details?id=net.dinglisch.android.taskerm) to communicate with a Bluetooth device using the Serial Port Profile (SPP). SPP is a protocole for serial communication over Bluetooth. For instance, it can be used to send/receive data to/from an arduino or ESP32 using Android. Make sure to pair the device first in Android.
+# TaskerGMail
+A plugin for Tasker (https://play.google.com/store/apps/details?id=net.dinglisch.android.taskerm) to send mails using Google Mail. Unlike existing plugins (https://play.google.com/store/apps/details?id=com.balda.mailtask&hl=en) and (https://play.google.com/store/apps/details?id=com.joaomgcd.autogmail&hl=en), this plugin can use Google accounts that are not added to the device.
 
-With this pugin, you can:
-- Connect, disconnect and send data to a Bluetooth device using a Tasker Action.
-- Receive data from the Bluetooth device using a Tasker Profile.
+This plugin can use Tasker variables for the email address of the recipiend and the subject and body of the mail to send.
 
-This plugin can use Tasker variables for the address of the Bluetooth device and the data to send or receive. The format of the transmitted data can be either string or hex.
-
+Limitations:
+- Only one GMail account can be used at a time.
+- Not possible to send files in attachment.
+- Can only send mails.
