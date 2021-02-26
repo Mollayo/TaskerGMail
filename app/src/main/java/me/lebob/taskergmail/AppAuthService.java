@@ -44,7 +44,6 @@ public class AppAuthService {
         this.context=context;
         initializeSettings(context);
 
-        // Fred
         AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
                 .setBrowserMatcher(new BrowserWhitelist(
                         VersionedBrowserMatcher.CHROME_BROWSER))
