@@ -7,6 +7,8 @@ repositories {
 }
 
 android {
+    namespace 'me.lebob.taskergmail'
+
     compileSdkVersion 33
 
     defaultConfig {
