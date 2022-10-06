@@ -1,13 +1,18 @@
 package me.lebob.taskergmail;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AppCompatActivity;
 
 import net.openid.appauth.AuthState;
 
@@ -24,11 +29,28 @@ import me.lebob.taskergmail.utils.Constants;
 
 
 public class MainActivity extends AppCompatActivity {
-
-    private static final int RC_AUTH = 100;
     AppAuthService authService;
     TextView tvStatus;
     String authStateJSon="";
+    ActivityResultLauncher<Intent> authServiceResultLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        authService.getAuthToken(result.getData(), () -> {
+                            MainActivity.this.setAuthStatus();
+
+                            // Save the authorization to a file
+                            AuthState authState = authService.getAuthState();
+                            authStateJSon = authState.jsonSerializeString();
+                            writeToFile(authStateJSon, getApplicationContext());
+                        });
+                    } else {
+                        Toast.makeText(MainActivity.this, R.string.login_cancelled, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -39,12 +61,7 @@ public class MainActivity extends AppCompatActivity {
 
         authService = AppAuthService.getInstance(this);
 
-        findViewById(R.id.authorize).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MainActivity.this.handleLogin();
-            }
-        });
+        findViewById(R.id.authorize).setOnClickListener(view -> MainActivity.this.handleLogin());
         tvStatus = findViewById(R.id.status);
 
 
@@ -59,29 +76,6 @@ public class MainActivity extends AppCompatActivity {
         setAuthStatus();
     }
 
-
-    // Method that gets called once request to enable GMail access
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_CANCELED) {
-            Toast.makeText(this, R.string.login_cancelled, Toast.LENGTH_SHORT).show();
-        }
-        else
-        {
-            authService.getAuthToken(data, new AppAuthService.TokenResponseCallback() {
-                @Override
-                public void onComplete() {
-                    MainActivity.this.setAuthStatus();
-
-                    // Save the authorization to a file
-                    AuthState authState=authService.getAuthState();
-                    authStateJSon=authState.jsonSerializeString();
-                    writeToFile(authStateJSon,getApplicationContext());
-                }
-            });
-        }
-    }
-
     private void handleLogin()
     {
         if (authService.clientId.length()==0) {
@@ -90,7 +84,8 @@ public class MainActivity extends AppCompatActivity {
                     Toast.LENGTH_LONG).show();
             return;
         }
-        startActivityForResult(authService.getAuthRequestIntent(), RC_AUTH);
+
+        authServiceResultLauncher.launch(authService.getAuthRequestIntent());
     }
 
     private void setAuthStatus() {

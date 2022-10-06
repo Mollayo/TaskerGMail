@@ -1,29 +1,26 @@
 package me.lebob.taskergmail;
 
+import static me.lebob.taskergmail.MainActivity.readFromFile;
+import static me.lebob.taskergmail.receivers.ActionSettingReceiver.sendMessage;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
 
 import net.openid.appauth.AuthState;
-import net.openid.appauth.AuthorizationException;
 
 import org.json.JSONException;
 
-import me.lebob.taskergmail.receivers.ActionSettingReceiver;
+import me.lebob.taskergmail.utils.ActionBundleManager;
 import me.lebob.taskergmail.utils.BundleScrubber;
 import me.lebob.taskergmail.utils.Constants;
-import me.lebob.taskergmail.utils.ActionBundleManager;
 import me.lebob.taskergmail.utils.TaskerPlugin;
-
-import static me.lebob.taskergmail.MainActivity.readFromFile;
-import static me.lebob.taskergmail.receivers.ActionSettingReceiver.sendMessage;
 
 
 public class ActionPluginActivity extends AppCompatActivity {
@@ -42,12 +39,7 @@ public class ActionPluginActivity extends AppCompatActivity {
         if (isBundleValid(previousBundle) && previousBlurb!=null)
             onPostCreateWithPreviousResult(previousBundle,previousBlurb);
 
-        findViewById(R.id.test_email).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ActionPluginActivity.this.sendTestEMail();
-            }
-        });
+        findViewById(R.id.test_email).setOnClickListener(view -> ActionPluginActivity.this.sendTestEMail());
 
         AuthState authState;
         oAuth=readFromFile(getApplicationContext());
@@ -164,8 +156,8 @@ public class ActionPluginActivity extends AppCompatActivity {
                 }
 
             } catch (JSONException e) {
-                Log.e(Constants.LOG_TAG, "Problem parsing the json file: " + e.toString());
-                Toast.makeText(getApplicationContext(), "Problem parsing the json file: " + e.toString(), Toast.LENGTH_LONG).show();
+                Log.e(Constants.LOG_TAG, "Problem parsing the json file: " + e);
+                Toast.makeText(getApplicationContext(), "Problem parsing the json file: " + e, Toast.LENGTH_LONG).show();
             }
         }
         else
@@ -175,23 +167,20 @@ public class ActionPluginActivity extends AppCompatActivity {
             return;
         }
 
-        authService.getAuthState().performActionWithFreshTokens(authService.service, new AuthState.AuthStateAction() {
-            @Override
-            public void execute(String accessToken, String idToken, AuthorizationException ex) {
-                if (ex != null) {
-                    Log.e(Constants.LOG_TAG, "Token refresh problem: " + ex.toString());
-                    Toast.makeText(getApplicationContext(),"Token problem: " + ex.toString(),Toast.LENGTH_LONG).show();
-                    return;
-                }
-                // Sending a message
-                String recipient = ((EditText) findViewById(R.id.email_address)).getText().toString();
-                String subject = ((EditText) findViewById(R.id.email_subject)).getText().toString();
-                String body = ((EditText) findViewById(R.id.email_body)).getText().toString();
-                if (!sendMessage(accessToken,recipient,subject,body))
-                    Toast.makeText(getApplicationContext(),"Failed to send the test email",Toast.LENGTH_LONG).show();
-                else
-                    Toast.makeText(getApplicationContext(),"Test mail sent successfully",Toast.LENGTH_SHORT).show();
+        authService.getAuthState().performActionWithFreshTokens(authService.service, (accessToken, idToken, ex) -> {
+            if (ex != null) {
+                Log.e(Constants.LOG_TAG, "Token refresh problem: " + ex);
+                Toast.makeText(getApplicationContext(),"Token problem: " + ex,Toast.LENGTH_LONG).show();
+                return;
             }
+            // Sending a message
+            String recipient = ((EditText) findViewById(R.id.email_address)).getText().toString();
+            String subject = ((EditText) findViewById(R.id.email_subject)).getText().toString();
+            String body = ((EditText) findViewById(R.id.email_body)).getText().toString();
+            if (!sendMessage(accessToken,recipient,subject,body))
+                Toast.makeText(getApplicationContext(),"Failed to send the test email",Toast.LENGTH_LONG).show();
+            else
+                Toast.makeText(getApplicationContext(),"Test mail sent successfully",Toast.LENGTH_SHORT).show();
         });
     }
 

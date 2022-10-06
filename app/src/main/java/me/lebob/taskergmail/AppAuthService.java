@@ -3,8 +3,8 @@ package me.lebob.taskergmail;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.support.annotation.Nullable;
-import android.widget.Toast;
+
+import androidx.annotation.Nullable;
 
 import net.openid.appauth.AppAuthConfiguration;
 import net.openid.appauth.AuthState;
@@ -15,7 +15,7 @@ import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceConfiguration;
 import net.openid.appauth.ResponseTypeValues;
 import net.openid.appauth.TokenResponse;
-import net.openid.appauth.browser.BrowserWhitelist;
+import net.openid.appauth.browser.BrowserAllowList;
 import net.openid.appauth.browser.VersionedBrowserMatcher;
 
 public class AppAuthService {
@@ -45,7 +45,7 @@ public class AppAuthService {
         initializeSettings(context);
 
         AppAuthConfiguration appAuthConfig = new AppAuthConfiguration.Builder()
-                .setBrowserMatcher(new BrowserWhitelist(
+                .setBrowserMatcher(new BrowserAllowList(
                         VersionedBrowserMatcher.CHROME_BROWSER))
                 .build();
 

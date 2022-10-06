@@ -11,14 +11,12 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.util.Base64;
+import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.Message;
-
+import com.google.common.io.BaseEncoding;
 
 import net.openid.appauth.AuthState;
-import net.openid.appauth.AuthorizationException;
 import net.openid.appauth.AuthorizationService;
 
 import java.io.ByteArrayOutputStream;
@@ -28,8 +26,8 @@ import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-import me.lebob.taskergmail.utils.Constants;
 import me.lebob.taskergmail.utils.ActionBundleManager;
+import me.lebob.taskergmail.utils.Constants;
 import me.lebob.taskergmail.utils.TaskerPlugin;
 
 
@@ -55,7 +53,6 @@ public class ActionSettingReceiver  extends BroadcastReceiver {
             Log.v(Constants.LOG_TAG, "localBundle is invalid"); //$NON-NLS-1$
             return;
         }
-        final Bundle passThroughMessage = TaskerPlugin.Event.retrievePassThroughData(intent);
 
         // Get the user parameters
         final String oAuth = ActionBundleManager.getOAuth(localeBundle);
@@ -70,28 +67,25 @@ public class ActionSettingReceiver  extends BroadcastReceiver {
             final Context appContext=context.getApplicationContext();
             final Intent fireIntentFromHost=intent;
             AuthorizationService service = new AuthorizationService(context.getApplicationContext());
-            authState.performActionWithFreshTokens(service, new AuthState.AuthStateAction() {
-                @Override
-                public void execute(String accessToken, String idToken, AuthorizationException ex) {
-                    if (ex != null) {
-                        Log.e(Constants.LOG_TAG, "Token refresh problem: " + ex.toString());
-                        TaskerPlugin.Setting.signalFinish( appContext, fireIntentFromHost, TaskerPlugin.Setting.RESULT_CODE_FAILED, null );
-                        return;
-                    }
-                    // Sending the message
-                    boolean error=!sendMessage(accessToken, recipient, subject, body);
-                    if (error)
-                    {
-                        TaskerPlugin.Setting.signalFinish( appContext, fireIntentFromHost, TaskerPlugin.Setting.RESULT_CODE_FAILED, null );
-                        Log.e(Constants.LOG_TAG, "Failed to send the email");
-                    }
-                    else
-                        TaskerPlugin.Setting.signalFinish( appContext, fireIntentFromHost, TaskerPlugin.Setting.RESULT_CODE_OK, null );
+            authState.performActionWithFreshTokens(service, (accessToken, idToken, ex) -> {
+                if (ex != null) {
+                    Log.e(Constants.LOG_TAG, "Token refresh problem: " + ex);
+                    TaskerPlugin.Setting.signalFinish( appContext, fireIntentFromHost, TaskerPlugin.Setting.RESULT_CODE_FAILED, null );
+                    return;
                 }
+                // Sending the message
+                boolean error1 =!sendMessage(accessToken, recipient, subject, body);
+                if (error1)
+                {
+                    TaskerPlugin.Setting.signalFinish( appContext, fireIntentFromHost, TaskerPlugin.Setting.RESULT_CODE_FAILED, null );
+                    Log.e(Constants.LOG_TAG, "Failed to send the email");
+                }
+                else
+                    TaskerPlugin.Setting.signalFinish( appContext, fireIntentFromHost, TaskerPlugin.Setting.RESULT_CODE_OK, null );
             });
         } catch (Exception e) {
             error=true;
-            Log.e(Constants.LOG_TAG, "Failed to send the email: " + e.toString());
+            Log.e(Constants.LOG_TAG, "Failed to send the email: " + e);
             e.printStackTrace();
         }
 
@@ -118,7 +112,7 @@ public class ActionSettingReceiver  extends BroadcastReceiver {
         }
         try {
             GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
-            JsonFactory jsonFactory = new JacksonFactory();
+            JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
             HttpTransport httpTransport = new NetHttpTransport();
             String app_name = "TaskerGMail";
             Gmail gmail = new Gmail.Builder(httpTransport, jsonFactory, credential).setApplicationName(app_name).build();
@@ -131,7 +125,7 @@ public class ActionSettingReceiver  extends BroadcastReceiver {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             mimeMessage.writeTo(baos);
             Message message = new Message();
-            message.setRaw(Base64.encodeBase64URLSafeString(baos.toByteArray()));
+            message.setRaw(BaseEncoding.base64Url().encode(baos.toByteArray()));
 
             gmail.users().messages().send("me", message).execute();
             return true;
