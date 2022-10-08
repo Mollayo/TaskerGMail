@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 
-import androidx.annotation.Nullable;
-
 import net.openid.appauth.AppAuthConfiguration;
 import net.openid.appauth.AuthState;
 import net.openid.appauth.AuthorizationException;
@@ -14,9 +12,10 @@ import net.openid.appauth.AuthorizationResponse;
 import net.openid.appauth.AuthorizationService;
 import net.openid.appauth.AuthorizationServiceConfiguration;
 import net.openid.appauth.ResponseTypeValues;
-import net.openid.appauth.TokenResponse;
 import net.openid.appauth.browser.BrowserAllowList;
 import net.openid.appauth.browser.VersionedBrowserMatcher;
+
+import java.util.Objects;
 
 public class AppAuthService {
 
@@ -74,7 +73,7 @@ public class AppAuthService {
     public Intent getAuthRequestIntent()
     {
         AuthorizationRequest.Builder builder = new AuthorizationRequest.Builder(
-            authState.getAuthorizationServiceConfiguration(),
+                Objects.requireNonNull(authState.getAuthorizationServiceConfiguration()),
             clientId,
             ResponseTypeValues.CODE,
             redirectUri
@@ -91,12 +90,9 @@ public class AppAuthService {
         authState.update(response, ex);
 
         if (response != null) {
-            service.performTokenRequest(response.createTokenExchangeRequest(), new AuthorizationService.TokenResponseCallback() {
-                @Override
-                public void onTokenRequestCompleted(@Nullable TokenResponse response1, @Nullable AuthorizationException ex1) {
-                    authState.update(response1, ex1);
-                    callback.onComplete();
-                }
+            service.performTokenRequest(response.createTokenExchangeRequest(), (response1, ex1) -> {
+                authState.update(response1, ex1);
+                callback.onComplete();
             });
         }
     }

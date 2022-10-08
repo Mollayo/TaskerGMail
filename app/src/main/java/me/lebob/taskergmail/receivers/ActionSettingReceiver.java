@@ -7,13 +7,14 @@ import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.model.Message;
+import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.auth.oauth2.AccessToken;
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.common.io.BaseEncoding;
 
 import net.openid.appauth.AuthState;
@@ -62,8 +63,7 @@ public class ActionSettingReceiver  extends BroadcastReceiver {
         boolean error=false;
 
         try {
-            AuthState authState;
-            authState=AuthState.jsonDeserialize(oAuth);
+            AuthState authState=AuthState.jsonDeserialize(oAuth);
             final Context appContext=context.getApplicationContext();
             final Intent fireIntentFromHost=intent;
             AuthorizationService service = new AuthorizationService(context.getApplicationContext());
@@ -111,11 +111,16 @@ public class ActionSettingReceiver  extends BroadcastReceiver {
             return false;
         }
         try {
-            GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
-            JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
-            HttpTransport httpTransport = new NetHttpTransport();
-            String app_name = "TaskerGMail";
-            Gmail gmail = new Gmail.Builder(httpTransport, jsonFactory, credential).setApplicationName(app_name).build();
+            AccessToken tok = new AccessToken(accessToken,null);
+            GoogleCredentials credentials=new GoogleCredentials(tok);
+            HttpRequestInitializer requestInitializer = new HttpCredentialsAdapter(credentials);
+
+            // Create the gmail API client
+            Gmail gmail = new Gmail.Builder(new NetHttpTransport(),
+                    GsonFactory.getDefaultInstance(),
+                    requestInitializer)
+                    .setApplicationName("TaskerGMail")
+                    .build();
 
             MimeMessage mimeMessage = new MimeMessage(Session.getDefaultInstance(new Properties()));
             mimeMessage.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(recipient));
