@@ -33,8 +33,10 @@ public class ActionPluginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_action);
 
-        final String previousBlurb = getIntent().getStringExtra(com.twofortyfouram.locale.api.Intent.EXTRA_STRING_BLURB);
-        final Bundle previousBundle = getIntent().getBundleExtra(com.twofortyfouram.locale.api.Intent.EXTRA_BUNDLE);
+        final String EXTRA_STRING_BLURB = "com.twofortyfouram.locale.intent.extra.BLURB";
+        final String previousBlurb = getIntent().getStringExtra(EXTRA_STRING_BLURB);
+        final String EXTRA_BUNDLE = "com.twofortyfouram.locale.intent.extra.BUNDLE";
+        final Bundle previousBundle = getIntent().getBundleExtra(EXTRA_BUNDLE);
         BundleScrubber.scrub(previousBundle);
         if (isBundleValid(previousBundle) && previousBlurb!=null)
             onPostCreateWithPreviousResult(previousBundle,previousBlurb);
@@ -128,11 +130,13 @@ public class ActionPluginActivity extends AppCompatActivity {
 
         super.onStop();
         Intent intent = new Intent();
-        intent.putExtra(com.twofortyfouram.locale.api.Intent.EXTRA_BUNDLE, resultBundle);
+        String EXTRA_BUNDLE = "com.twofortyfouram.locale.intent.extra.BUNDLE";
+        intent.putExtra(EXTRA_BUNDLE, resultBundle);
 
         // For the explanation text of the plugin
         String blurbStr=getResultBlurb(resultBundle);
-        intent.putExtra(com.twofortyfouram.locale.api.Intent.EXTRA_STRING_BLURB, blurbStr);
+        String EXTRA_STRING_BLURB = "com.twofortyfouram.locale.intent.extra.BLURB";
+        intent.putExtra(EXTRA_STRING_BLURB, blurbStr);
 
         // For the synchronous execution
         if (TaskerPlugin.Setting.hostSupportsSynchronousExecution( getIntent().getExtras()))

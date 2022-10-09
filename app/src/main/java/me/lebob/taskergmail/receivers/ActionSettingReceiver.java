@@ -49,7 +49,8 @@ public class ActionSettingReceiver  extends BroadcastReceiver {
     {
         Log.v(Constants.LOG_TAG, "ActionSettingReceiver::firePluginSetting");
 
-        final Bundle localeBundle = intent.getBundleExtra(com.twofortyfouram.locale.api.Intent.EXTRA_BUNDLE);
+        final String EXTRA_BUNDLE = "com.twofortyfouram.locale.intent.extra.BUNDLE";
+        final Bundle localeBundle = intent.getBundleExtra(EXTRA_BUNDLE);
         if (!isBundleValid(localeBundle)) {
             Log.v(Constants.LOG_TAG, "localBundle is invalid"); //$NON-NLS-1$
             return;
